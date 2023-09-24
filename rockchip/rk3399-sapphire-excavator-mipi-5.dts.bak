@@ -1,0 +1,587 @@
+/*
+ * Copyright (c) 2018 Fuzhou Rockchip Electronics Co., Ltd
+ *
+ * This file is dual-licensed: you can use it either under the terms
+ * of the GPL or the X11 license, at your option. Note that this dual
+ * licensing only applies to this file, and not this project as a
+ * whole.
+ *
+ *  a) This file is free software; you can redistribute it and/or
+ *     modify it under the terms of the GNU General Public License as
+ *     published by the Free Software Foundation; either version 2 of the
+ *     License, or (at your option) any later version.
+ *
+ *     This file is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ * Or, alternatively,
+ *
+ *  b) Permission is hereby granted, free of charge, to any person
+ *     obtaining a copy of this software and associated documentation
+ *     files (the "Software"), to deal in the Software without
+ *     restriction, including without limitation the rights to use,
+ *     copy, modify, merge, publish, distribute, sublicense, and/or
+ *     sell copies of the Software, and to permit persons to whom the
+ *     Software is furnished to do so, subject to the following
+ *     conditions:
+ *
+ *     The above copyright notice and this permission notice shall be
+ *     included in all copies or substantial portions of the Software.
+ *
+ *     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ *     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ *     OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ *     NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ *     HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ *     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ *     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ *     OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+/dts-v1/;
+
+#include "rk3399-excavator-sapphire.dtsi"
+#include "rk3399-android.dtsi"
+#include "rk3399-vop-clk-set.dtsi"
+
+/ {
+
+	model = "Rockchip RK3399 Excavator Board edp (Android)";
+	compatible = "rockchip,android", "rockchip,rk3399-excavator-edp", "rockchip,rk3399";
+
+	vcc_lcd: vcc-lcd {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc_lcd";
+		//gpio = <&gpio1 2 GPIO_ACTIVE_HIGH>;		//GPIO1_A2
+		startup-delay-us = <20000>;
+		enable-active-high;
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-boot-on;
+		vin-supply = <&vcc5v0_sys>;
+	};
+
+	test-power {
+		status = "okay";
+	};
+
+	gpio-controller {
+		compatible = "gpio_control";
+		pinctrl-names = "default";
+		pinctrl-0 = <&gpio_contrl>;		
+		host_pwr = <&gpio4 RK_PD5 GPIO_ACTIVE_HIGH>;			//Host power
+		spk_pwr = <&gpio4 RK_PD0 GPIO_ACTIVE_HIGH>;			//spk power
+				
+		status = "okay";
+	};
+
+ rockchip-wg-output {
+ 		compatible = "rockchip-wg-output";
+ 		pinctrl-names = "default";
+ 		WG-DATA0 = <&gpio4 RK_PD1 GPIO_ACTIVE_HIGH>;
+ 		WG-DATA1 = <&gpio4 RK_PD2 GPIO_ACTIVE_HIGH>;
+ 		status = "okay";
+ 	};	
+/*
+ rockchip-wg-input {
+ 		compatible = "rockchip-wiegand-input";
+ 		pinctrl-names = "default";
+ 		wg-in-data0 = <&gpio5 RK_PB4 GPIO_ACTIVE_HIGH>; //GPIO5_B4
+ 		wg-in-data1 = <&gpio5 RK_PB5 GPIO_ACTIVE_HIGH>; //GPIO5_B5
+ 		status = "okay";
+ 	};	
+*/		
+/*	
+	clocks {
+		osc26m: clk@1 {
+			compatible = "fixed-clock";
+			reg = <1>;
+			#clock-cells = <0>;
+			clock-frequency = <26000000>;		//26MHz		//<20000000>;		//20MHz
+			clock-output-names = "osc26m";
+		};
+	};
+*/	
+		
+};
+
+
+&dsi {
+	status = "okay";
+	//rockchip,lane-rate = <250>;
+	panel@0 {
+		compatible ="simple-panel-dsi";
+		reg = <0>;
+		backlight = <&backlight>;
+		enable-gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;		//GPIO1_A2
+
+		dsi,flags = <(MIPI_DSI_MODE_VIDEO | MIPI_DSI_MODE_VIDEO_BURST | MIPI_DSI_MODE_LPM | MIPI_DSI_MODE_EOT_PACKET)>;	
+		dsi,format = <MIPI_DSI_FMT_RGB888>;
+		dsi,lanes = <2>;
+
+    reset-delay-ms = <120>;
+    init-delay-ms = <120>;
+    enable-delay-ms = <120>;
+    prepare-delay-ms = <120>;
+
+   panel-init-sequence = [
+     	05 05 01 01
+ 	
+      23 05 02 7a c1
+      23 05 02 20 20
+      23 05 02 21 e0
+      23 05 02 22 13
+      23 05 02 23 d2		//hfp
+      23 05 02 24 0a		//hsync-len
+      23 05 02 25 24		//hback-porch
+      23 05 02 26 00
+      23 05 02 27 11		//vfront-porch
+      23 05 02 28 01		//vsync-len
+      23 05 02 29 16		//vback-porch    
+      23 05 02 34 80
+      23 05 02 36 d2		//hfp
+      23 05 02 86 29      
+      23 05 02 b5 a0
+      23 05 02 5c ff  
+      23 05 02 2a 01
+     // 23 05 02 2a 49	//test rgb colour         
+     // 23 05 02 14 43	//test rgb colour             
+      23 05 02 56 92
+      23 05 02 6b 72
+      23 05 02 69 27
+      23 05 02 10 45		//45:BGR	40:RGB
+      23 05 02 11 88
+      23 05 02 b6 20
+      23 05 02 51 20
+      23 05 02 09 10
+     
+      05 78 01 11
+      05 78 01 29
+    ];
+
+    panel-exit-sequence = [
+      05 14 01 28
+      05 50 01 10
+    ];
+
+		display-timings {
+			native-mode = <&timing0>;
+
+			timing0: timing0 {
+			
+			  //for 5 inch mipi to rgb lcd
+				clock-frequency = <33000000>;
+        hactive = <800>;
+        vactive = <480>;
+
+        hfront-porch = <210>;
+        hsync-len = <10>;
+        hback-porch = <36>;
+
+        vfront-porch = <17>;
+        vsync-len = <1>;
+        vback-porch = <22>;
+
+        hsync-active = <0>;
+        vsync-active = <0>;
+        de-active = <0>;
+        pixelclk-active = <0>;						
+									
+			};				
+			
+		};
+/*
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			port@0 {
+				reg = <0>;
+				panel_in_dsi: endpoint {
+					remote-endpoint = <&dsi_out_panel>;
+				};
+			};
+		};
+*/		
+	};
+/*
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port@1 {
+			reg = <1>;
+			dsi_out_panel: endpoint {
+				remote-endpoint = <&panel_in_dsi>;
+			};
+		};
+	};
+*/	
+	
+};
+
+
+
+&backlight {
+	status = "okay";
+};
+
+&dsi_in_vopl {
+	status = "disabled";
+};
+
+&dsi_in_vopb {
+	status = "okay";
+};
+
+&hdmi_in_vopb {
+	status = "disabled";
+};
+
+&dp_sound {
+	status = "disabled";	//"okay";	//
+};
+
+&hdmi_dp_sound {
+	status = "disabled";	//"okay";	//
+};
+
+&i2s0 {
+	status = "okay";
+	rockchip,playback-channels = <8>;
+	rockchip,capture-channels = <8>;
+	#sound-dai-cells = <0>;
+};
+
+&i2s2 {
+	status = "okay";
+};
+
+&hdmi_sound {
+	status = "disabled";	//"okay";
+};
+
+//&cdn_dp {
+//	status = "disabled";	//"okay";
+//	extcon = <&fusb0>;
+//	phys = <&tcphy0_dp>;
+//};
+
+&dp_in_vopb {
+	status = "disabled";
+};
+
+&i2c4 {
+	status = "disabled";		//"okay";
+
+	gc2145: gc2145@3c{
+		status = "disabled";	//"okay";
+		compatible = "galaxycore,gc2145";
+		reg = <0x3c>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&cif_clkout>;
+
+		clocks = <&cru SCLK_CIF_OUT>;
+		clock-names = "xvclk";
+
+		/* avdd-supply = <>; */
+		/* dvdd-supply = <>; */
+		/* dovdd-supply = <>; */
+		pwdn-gpios = <&gpio2 28 GPIO_ACTIVE_HIGH>;	//ok
+		rockchip,camera-module-index = <1>;
+		rockchip,camera-module-facing = "front";
+		rockchip,camera-module-name = "CameraKing";
+		rockchip,camera-module-lens-name = "Largan";
+		port {
+			gc2145_out: endpoint {
+				remote-endpoint = <&dvp_in_fcam>;
+			};
+		};
+	};
+
+};
+
+&i2c2 {
+	status = "okay";
+	
+	vm149c: vm149c@0c {
+		compatible = "silicon touch,vm149c";
+		status = "disabled";		//"okay";
+		reg = <0x0c>;
+		rockchip,camera-module-index = <0>;
+		rockchip,camera-module-facing = "back";
+	};
+	
+	ov13850: ov13850@10 {
+		compatible = "ovti,ov13850";
+		status = "okay";
+		reg = <0x10>;
+		clocks = <&cru SCLK_CIF_OUT>;
+		clock-names = "xvclk";
+		/* avdd-supply = <>; */
+		/* dvdd-supply = <>; */
+		/* dovdd-supply = <>; */
+		/* reset-gpios = <>; */
+		reset-gpios = <&gpio1 RK_PB1 GPIO_ACTIVE_HIGH>; 
+		pwdn-gpios = <&gpio2 RK_PB4 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "rockchip,camera_default";
+		pinctrl-0 = <&cif_clkout &csi_pins>;
+		//pinctrl-0 = <&cif_clkout>;
+		rockchip,camera-module-index = <0>;
+		rockchip,camera-module-facing = "back";
+		rockchip,camera-module-name = "CMK-CT0116";
+		rockchip,camera-module-lens-name = "Largan-50013A1";
+		lens-focus = <&vm149c>;
+		port {
+			ucam_out0: endpoint {
+				remote-endpoint = <&mipi_in_ucam0>;
+				//remote-endpoint = <&mipi_in_ucam1>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+
+
+	
+};
+
+
+&i2c6 {
+	status = "okay";
+	
+	//clock-frequency = <400000>;
+	//i2c-scl-rising-time-ns = <138>;
+	//i2c-scl-falling-time-ns = <4>;	
+
+/*
+	gt9xx: gt9xx@01 {
+		compatible = "goodix,gt9xx";
+		reg = <0x5d>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&touch_gpio>;
+		touch-gpio = <&gpio1 RK_PA2 IRQ_TYPE_LEVEL_LOW>;
+		reset-gpio = <&gpio1 RK_PC6 GPIO_ACTIVE_LOW>;
+		max-x = <1280>;
+		max-y = <800>;
+		tp-size = <89>;
+		//tp-supply = <&vcc_3v3>;
+	};
+*/	
+
+
+	gslx680: gslx680@40 {
+		status = "okay";
+		compatible = "gslX680";
+		reg = <0x40>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&touch_gpio>;		
+		screen_max_x = <800>;
+		screen_max_y = <480>;
+		//touch-gpio = <&gpio1 RK_PB5 IRQ_TYPE_LEVEL_LOW>;
+		//reset-gpio = <&gpio1 RK_PA3 GPIO_ACTIVE_HIGH>;
+		//touch-gpio = <&gpio1 RK_PB5 IRQ_TYPE_LEVEL_HIGH>;		//EM3399-POE
+		//reset-gpio = <&gpio1 RK_PA3 GPIO_ACTIVE_HIGH>;
+		touch-gpio = <&gpio3 RK_PD4 IRQ_TYPE_LEVEL_HIGH>;			//EM3399
+		reset-gpio = <&gpio4 RK_PC6 GPIO_ACTIVE_HIGH>;				
+		flip-x = <0>;
+		flip-y = <0>;
+		swap-xy = <0>;				
+		gsl,fw = <1>;	
+	};
+
+/*
+	gslx680: gslx680@40 {
+		status = "okay";
+		compatible = "gslX680-pad";
+		reg = <0x40>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&touch_gpio>;		
+		screen_max_x = <800>;
+		screen_max_y = <480>;
+		//touch-gpio = <&gpio1 RK_PB5 IRQ_TYPE_LEVEL_HIGH>;		//EM3399-POE
+		//reset-gpio = <&gpio1 RK_PA3 GPIO_ACTIVE_HIGH>;
+		touch-gpio = <&gpio3 RK_PD4 IRQ_TYPE_LEVEL_LOW>;			//EM3399
+		reset-gpio = <&gpio4 RK_PC6 GPIO_ACTIVE_HIGH>;		
+		revert_x = <0>;
+		revert_y = <0>;
+		revert_xy = <0>;				
+		chip_id = <0>;
+	};
+*/	
+	
+};	
+
+
+&isp0_mmu {
+	status = "okay";
+};
+
+&isp1_mmu {
+	status = "okay";
+};
+
+&mipi_dphy_rx0 {
+	status = "okay";	//"disabled";
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port@0 {
+			reg = <0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			mipi_in_ucam0: endpoint@1 {
+				reg = <1>;
+				remote-endpoint = <&ucam_out0>;
+				data-lanes = <1 2>;	//<1 2 3 4>;		//
+			};
+		};
+
+		port@1 {
+			reg = <1>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			dphy_rx0_out: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&isp0_mipi_in>;
+			};
+		};
+	};
+};
+
+&mipi_dphy_tx1rx1 {
+	status = "okay";		//"disabled";
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port@0 {
+			reg = <0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			mipi_in_ucam1: endpoint@1 {
+				reg = <1>;
+				//remote-endpoint = <&ucam_out1>;
+				data-lanes = <1 2>;
+			};
+		};
+
+		port@1 {
+			reg = <1>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			dphy_tx1rx1_out: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&isp1_mipi_in>;
+			};
+		};
+	};
+};
+
+&vopb {
+	status = "okay";
+	assigned-clocks = <&cru DCLK_VOP0_DIV>;
+	assigned-clock-parents = <&cru PLL_CPLL>;
+};
+
+&vopl {
+	status = "okay";
+	assigned-clocks = <&cru DCLK_VOP1_DIV>;
+	assigned-clock-parents = <&cru PLL_VPLL>;
+};
+
+&pcie_phy {
+	status = "okay";
+};
+
+&pcie0 {
+	status = "okay";
+};
+
+&rkisp1_0 {
+	status = "okay";		//"disabled";
+
+	port {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		isp0_mipi_in: endpoint@0 {
+			reg = <0>;
+			remote-endpoint = <&dphy_rx0_out>;
+		};
+	};
+};
+
+&rkisp1_1 {
+	status = "disabled";
+
+	port {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		isp1_mipi_in: endpoint@0 {
+			reg = <0>;
+			remote-endpoint = <&dphy_tx1rx1_out>;
+		};
+		dvp_in_fcam: endpoint@1 {
+			reg = <1>;
+			remote-endpoint = <&gc2145_out>;
+		};
+	};
+};
+
+&route_dsi {
+	status = "okay";
+	connect = <&vopb_out_dsi>;
+};
+
+&route_hdmi {
+	status = "okay";
+	connect = <&vopl_out_hdmi>;
+};
+
+&pinctrl {
+
+	gpio-contrl {
+		gpio_contrl:gpio-ctl {
+			rockchip,pins =
+				<4 RK_PC5 RK_FUNC_GPIO &pcfg_pull_up>,	
+				//<4 RK_PC6 RK_FUNC_GPIO &pcfg_pull_up>,						
+				<4 RK_PD5 RK_FUNC_GPIO &pcfg_pull_up>,
+				<4 RK_PD0 RK_FUNC_GPIO &pcfg_pull_up>;		
+		};
+	};
+	
+	ov13850-csi {
+		csi_pins: csi-pins {
+			rockchip,pins =
+				<1 RK_PB1 RK_FUNC_GPIO &pcfg_pull_up>,
+				<2 RK_PB4 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};
+
+	lcd-panel {
+		lcd_panel_reset: lcd-panel-reset {
+			rockchip,pins = <4 RK_PD6 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};
+
+	touch {
+		touch_gpio: touch-gpio {
+			rockchip,pins =
+				//<1 RK_PB5 RK_FUNC_GPIO &pcfg_pull_up>,		////EM3399-POE
+				//<1 RK_PA3 RK_FUNC_GPIO &pcfg_pull_none>;
+				<3 RK_PD4 RK_FUNC_GPIO &pcfg_pull_up>,			//EM3399
+				<4 RK_PC6 RK_FUNC_GPIO &pcfg_pull_none>;				
+		};
+	};
+
+};
